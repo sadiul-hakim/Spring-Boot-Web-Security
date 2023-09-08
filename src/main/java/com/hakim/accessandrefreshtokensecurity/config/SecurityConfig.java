@@ -39,7 +39,12 @@ public class SecurityConfig {
                 "/user/public/**"
         };
 
+        String[] permitAllApiList = {
+                "/refreshToken"
+        };
+
         return http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.requestMatchers(permitAllApiList).permitAll())
                 .authorizeHttpRequests(auth -> auth.requestMatchers(privateApiList).hasRole("ADMIN"))
                 .authorizeHttpRequests(auth -> auth.requestMatchers(publicApiList).hasRole("USER"))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
