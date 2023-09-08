@@ -23,12 +23,12 @@ public class UserService {
 
     public User getById(long userId) {
         return repository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User fot found with id : " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + userId));
     }
 
     public User getByUsername(String username) {
         return repository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User fot found with username : " + username));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username : " + username));
     }
 
     public List<User> getAll() {

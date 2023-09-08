@@ -25,12 +25,12 @@ public class RoleService {
 
     public Role getById(long roleId) {
         return repository.findById(roleId)
-                .orElseThrow(() -> new ResourceNotFoundException("Role fot found with id : " + roleId));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with id : " + roleId));
     }
 
     public Role getByAuthority(String authority) {
         return repository.findByAuthority(authority)
-                .orElseThrow(() -> new ResourceNotFoundException("Role fot found with authority : " + authority));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with authority : " + authority));
     }
 
     public List<Role> getAll() {
@@ -39,9 +39,9 @@ public class RoleService {
 
     public void addRoleToUser(UserRole userRole){
         Role role = repository.findByAuthority(userRole.getAuthority())
-                .orElseThrow(() -> new ResourceNotFoundException("Role fot found with authority : " + userRole.getAuthority()));
+                .orElseThrow(() -> new ResourceNotFoundException("Role not found with authority : " + userRole.getAuthority()));
         User user = userRepository.findByUsername(userRole.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("User fot found with username : " + userRole.getUsername()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username : " + userRole.getUsername()));
 
         user.getRoles().add(role);
     }

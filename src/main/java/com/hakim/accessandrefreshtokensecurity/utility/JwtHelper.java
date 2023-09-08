@@ -1,9 +1,6 @@
 package com.hakim.accessandrefreshtokensecurity.utility;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -15,60 +12,71 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-@Component
 public class JwtHelper {
     private static final String SECRET = "VxRfBGJFviiO62cg/M0YY5WypcyvtUUjfkI5aDJgwt4dLz6BQKuaKChKyn+Ulhz+";
 
-    public String generateToken(UserDetails userDetails) {
+    public static String generateToken(UserDetails userDetails, long expirationDate) {
 
         Map<String, Object> extraClaims = new HashMap<>();
-        return generateToken(userDetails,extraClaims);
+        extraClaims.put("roles", userDetails.getAuthorities());
+
+        return generateToken(userDetails, extraClaims, expirationDate);
     }
 
-    private String generateToken(UserDetails userDetails, Map<String, Object> extraClaims) {
+    private static String generateToken(UserDetails userDetails, Map<String, Object> extraClaims, long expirationDate) {
 
         return Jwts.builder()
                 .setClaims(extraClaims)
-                .signWith(getSecretKey(),SignatureAlgorithm.HS256)
-                .setExpiration(new Date(System.currentTimeMillis() + (1000 * 60 * 60 * 24 * 7)))
+                .signWith(getSecretKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + expirationDate))
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setSubject(userDetails.getUsername())
                 .compact();
     }
 
-    public boolean isValidToken(String token, UserDetails details) {
-        return extractUsername(token).equalsIgnoreCase(details.getUsername()) && !isExpired(token);
+    public static boolean isValidToken(String token, UserDetails details) throws MalformedJwtException{
+
+        boolean isValid = extractUsername(token).equalsIgnoreCase(details.getUsername()) && !isExpired(token);
+        if(!isValid){
+            throw new MalformedJwtException("Invalid Token");
+        }
+        return true;
     }
 
-    private boolean isExpired(String token) {
+    private static boolean isExpired(String token) {
 
         return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
+    private static Date extractExpiration(String token) throws MalformedJwtException {
 
         return parseSingleClaim(token, Claims::getExpiration);
     }
 
-    public String extractUsername(String token) {
+    public static String extractUsername(String token) throws MalformedJwtException {
 
         return parseSingleClaim(token, Claims::getSubject);
     }
 
-    private <T> T parseSingleClaim(String token, Function<Claims, T> resolver) {
+    public static Object extractClaim(String token,String claim) throws MalformedJwtException {
+
+        return parseSingleClaim(token, claims -> claims.get(claim, Object.class));
+    }
+
+    private static  <T> T parseSingleClaim(String token, Function<Claims, T> resolver) throws MalformedJwtException {
 
         Claims claims = extractAllClaims(token);
         return resolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
+    private static Claims extractAllClaims(String token) throws MalformedJwtException {
 
         JwtParser parser = Jwts.parserBuilder()
                 .setSigningKey(getSecretKey()).build();
         return parser.parseClaimsJws(token).getBody();
     }
 
-    private Key getSecretKey() {
+    private static Key getSecretKey() {
 
         return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
