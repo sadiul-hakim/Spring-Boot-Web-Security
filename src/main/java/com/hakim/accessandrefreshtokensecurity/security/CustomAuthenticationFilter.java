@@ -15,6 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,8 +48,12 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         User user = (User) authentication.getPrincipal();
 
         // Generate access and refresh tokens
-        String accessToken = JwtHelper.generateToken(user, (1000L * 60 * 60 * 24 * 7)); // expires in 7 days
-        String refreshToken = JwtHelper.generateToken(user, (1000L * 60 * 60 * 24 * 30)); // expires in 30 days
+        // Access token has all the authority information while refresh token does not.
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("roles", user.getAuthorities());
+
+        String accessToken = JwtHelper.generateToken(user,extraClaims, (1000L * 60 * 60 * 24 * 7)); // expires in 7 days
+        String refreshToken = JwtHelper.generateToken(user, Collections.emptyMap() ,(1000L * 60 * 60 * 24 * 30)); // expires in 30 days
 
         Map<String,String> tokenMap = new HashMap<>();
         tokenMap.put("access-token",accessToken);

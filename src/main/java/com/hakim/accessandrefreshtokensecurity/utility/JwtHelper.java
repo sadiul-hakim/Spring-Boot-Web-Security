@@ -1,29 +1,20 @@
 package com.hakim.accessandrefreshtokensecurity.utility;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
 public class JwtHelper {
     private static final String SECRET = "VxRfBGJFviiO62cg/M0YY5WypcyvtUUjfkI5aDJgwt4dLz6BQKuaKChKyn+Ulhz+";
 
-    public static String generateToken(UserDetails userDetails, long expirationDate) {
 
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("roles", userDetails.getAuthorities());
-
-        return generateToken(userDetails, extraClaims, expirationDate);
-    }
-
-    private static String generateToken(UserDetails userDetails, Map<String, Object> extraClaims, long expirationDate) {
+    public static String generateToken(UserDetails userDetails, Map<String, Object> extraClaims, long expirationDate) {
 
         return Jwts.builder()
                 .setClaims(extraClaims)
@@ -78,6 +69,7 @@ public class JwtHelper {
 
     private static Key getSecretKey() {
 
-        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
+        byte[] bytes = Decoders.BASE64.decode(SECRET);
+        return Keys.hmacShaKeyFor(bytes);
     }
 }
