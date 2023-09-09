@@ -3,6 +3,7 @@ package com.hakim.accessandrefreshtokensecurity.utility;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.Key;
@@ -44,7 +45,7 @@ public class JwtHelper {
         return parseSingleClaim(token, Claims::getExpiration);
     }
 
-    public static String extractUsername(String token) throws MalformedJwtException {
+    public static String extractUsername(String token) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
 
         return parseSingleClaim(token, Claims::getSubject);
     }
@@ -54,13 +55,13 @@ public class JwtHelper {
         return parseSingleClaim(token, claims -> claims.get(claim, Object.class));
     }
 
-    private static  <T> T parseSingleClaim(String token, Function<Claims, T> resolver) throws MalformedJwtException {
+    private static  <T> T parseSingleClaim(String token, Function<Claims, T> resolver) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
 
         Claims claims = extractAllClaims(token);
         return resolver.apply(claims);
     }
 
-    private static Claims extractAllClaims(String token) throws MalformedJwtException {
+    private static Claims extractAllClaims(String token) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException {
 
         JwtParser parser = Jwts.parserBuilder()
                 .setSigningKey(getSecretKey()).build();

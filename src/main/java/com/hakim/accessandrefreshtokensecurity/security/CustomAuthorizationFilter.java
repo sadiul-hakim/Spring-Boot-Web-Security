@@ -3,7 +3,10 @@ package com.hakim.accessandrefreshtokensecurity.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hakim.accessandrefreshtokensecurity.service.CustomUserDetailsService;
 import com.hakim.accessandrefreshtokensecurity.utility.JwtHelper;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -55,11 +58,11 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 userDetails.getPassword(),
-                                userDetails.getAuthorities()
+                                userDetails.getAuthorities() // We need to pass the Granted Authority list, otherwise user would be forbidden.
                         );
                         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                     }
-                } catch (MalformedJwtException ex) {
+                } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException ex) {
 
                     // If the token is Invalid send an error with the response
                     Map<String, String> tokenMap = new HashMap<>();

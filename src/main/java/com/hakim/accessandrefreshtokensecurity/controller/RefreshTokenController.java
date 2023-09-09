@@ -2,7 +2,10 @@ package com.hakim.accessandrefreshtokensecurity.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hakim.accessandrefreshtokensecurity.utility.JwtHelper;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +24,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class RefreshTokenController {
     private final UserDetailsService userDetailsService;
+
     @GetMapping("/refreshToken")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -39,13 +43,17 @@ public class RefreshTokenController {
                 // If the token is valid generate a new access token and send it to user.
                 if (JwtHelper.isValidToken(token, userDetails)) {
 
-                    String accessToken = JwtHelper.generateToken(userDetails, (1000 * 60 * 60 * 24 * 7));
+                    Map<String, Object> extraClaims = new HashMap<>();
+                    extraClaims.put("roles", userDetails.getAuthorities());
+                    String accessToken = JwtHelper.generateToken(userDetails, extraClaims, (1000 * 60 * 60 * 24 * 7));
+
                     Map<String, String> tokenMap = new HashMap<>();
                     tokenMap.put("access-token", accessToken);
                     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                     new ObjectMapper().writeValue(response.getOutputStream(), tokenMap);
                 }
-            } catch (MalformedJwtException | IOException ex) {
+            } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
+                     IllegalArgumentException ex) {
 
                 // If the token is Invalid send an error with the response
                 Map<String, String> tokenMap = new HashMap<>();
