@@ -1,13 +1,12 @@
 package com.hakim.accessandrefreshtokensecurity.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hakim.accessandrefreshtokensecurity.model.User;
 import com.hakim.accessandrefreshtokensecurity.utility.JwtHelper;
+import com.hakim.accessandrefreshtokensecurity.utility.ResponseUtility;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -59,8 +58,6 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
         tokenMap.put("access-token",accessToken);
         tokenMap.put("refresh-token",refreshToken);
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-        new ObjectMapper().writeValue(response.getOutputStream(),tokenMap);
+        ResponseUtility.commitResponse(response,tokenMap);
     }
 }

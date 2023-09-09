@@ -1,8 +1,8 @@
 package com.hakim.accessandrefreshtokensecurity.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hakim.accessandrefreshtokensecurity.service.CustomUserDetailsService;
 import com.hakim.accessandrefreshtokensecurity.utility.JwtHelper;
+import com.hakim.accessandrefreshtokensecurity.utility.ResponseUtility;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -65,10 +64,9 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                 } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException ex) {
 
                     // If the token is Invalid send an error with the response
-                    Map<String, String> tokenMap = new HashMap<>();
-                    tokenMap.put("error", "Invalid Token");
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    new ObjectMapper().writeValue(response.getOutputStream(), tokenMap);
+                    Map<String, String> errorMap = new HashMap<>();
+                    errorMap.put("error", "Invalid Token");
+                    ResponseUtility.commitResponse(response,errorMap);
                 }
             }
 

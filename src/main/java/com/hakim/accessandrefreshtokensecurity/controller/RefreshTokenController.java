@@ -1,7 +1,7 @@
 package com.hakim.accessandrefreshtokensecurity.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hakim.accessandrefreshtokensecurity.utility.JwtHelper;
+import com.hakim.accessandrefreshtokensecurity.utility.ResponseUtility;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,23 +42,23 @@ public class RefreshTokenController {
                 // If the token is valid generate a new access token and send it to user.
                 if (JwtHelper.isValidToken(token, userDetails)) {
 
+                    // Generate access token
                     Map<String, Object> extraClaims = new HashMap<>();
                     extraClaims.put("roles", userDetails.getAuthorities());
                     String accessToken = JwtHelper.generateToken(userDetails, extraClaims, (1000 * 60 * 60 * 24 * 7));
 
+                    // Send it to the user
                     Map<String, String> tokenMap = new HashMap<>();
                     tokenMap.put("access-token", accessToken);
-                    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                    new ObjectMapper().writeValue(response.getOutputStream(), tokenMap);
+                    ResponseUtility.commitResponse(response,tokenMap);
                 }
             } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException |
                      IllegalArgumentException ex) {
 
                 // If the token is Invalid send an error with the response
-                Map<String, String> tokenMap = new HashMap<>();
-                tokenMap.put("error", "Invalid Token");
-                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-                new ObjectMapper().writeValue(response.getOutputStream(), tokenMap);
+                Map<String, String> errorMap = new HashMap<>();
+                errorMap.put("error", "Invalid Token");
+                ResponseUtility.commitResponse(response,errorMap);
             }
         } else {
             throw new RuntimeException("Refresh token is missing.");
