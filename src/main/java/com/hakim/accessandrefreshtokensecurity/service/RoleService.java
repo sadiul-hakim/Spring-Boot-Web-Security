@@ -28,11 +28,6 @@ public class RoleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Role not found with id : " + roleId));
     }
 
-    public Role getByAuthority(String authority) {
-        return repository.findByAuthority(authority)
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found with authority : " + authority));
-    }
-
     public List<Role> getAll() {
         return repository.findAll();
     }

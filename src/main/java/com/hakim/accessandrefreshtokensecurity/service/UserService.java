@@ -26,11 +26,6 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id : " + userId));
     }
 
-    public User getByUsername(String username) {
-        return repository.findByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with username : " + username));
-    }
-
     public List<User> getAll() {
         return repository.findAll();
     }
